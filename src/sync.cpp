@@ -1,17 +1,19 @@
 // Copyright (c) 2011-2014 The Bitcoin developers
-// Copyright (c) 2017-2018 The PIVX developers
+// Copyright (c) 2017-2018 The PIVX Developers
+// Copyright (c) 2018 The RUPAYA Developers 
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "sync.h"
 
-#include <memory>
 #include <set>
 
 #include "util.h"
 #include "utilstrencodings.h"
 
 #include <stdio.h>
+
+#include <boost/foreach.hpp>
 
 #ifdef DEBUG_LOCKCONTENTION
 #if !defined(HAVE_THREAD_LOCAL)
@@ -50,6 +52,8 @@ struct CLockLocation {
         return mutexName + "  " + sourceFile + ":" + itostr(sourceLine) + (fTry ? " (TRY)" : "");
     }
 
+    std::string MutexName() const { return mutexName; }
+
 private:
     bool fTry;
     std::string mutexName;
@@ -75,13 +79,13 @@ struct LockData {
     std::mutex dd_mutex;
 } static lockdata;
 
-static thread_local LockStack g_lockstack;
+static thread_local std::unique_ptr<LockStack> lockstack;
 
 static void potential_deadlock_detected(const std::pair<void*, void*>& mismatch, const LockStack& s1, const LockStack& s2)
 {
     LogPrintf("POTENTIAL DEADLOCK DETECTED\n");
     LogPrintf("Previous lock order was:\n");
-    for (const std::pair<void*, CLockLocation>& i : s2) {
+    BOOST_FOREACH (const PAIRTYPE(void*, CLockLocation) & i, s2) {
         if (i.first == mismatch.first) {
             LogPrintf(" (1)");
         }
@@ -91,7 +95,7 @@ static void potential_deadlock_detected(const std::pair<void*, void*>& mismatch,
         LogPrintf(" %s\n", i.second.ToString());
     }
     LogPrintf("Current lock order is:\n");
-    for (const std::pair<void*, CLockLocation>& i : s1) {
+    BOOST_FOREACH (const PAIRTYPE(void*, CLockLocation) & i, s1) {
         if (i.first == mismatch.first) {
             LogPrintf(" (1)");
         }
@@ -102,20 +106,23 @@ static void potential_deadlock_detected(const std::pair<void*, void*>& mismatch,
     }
 }
 
-static void push_lock(void* c, const CLockLocation& locklocation)
+static void push_lock(void* c, const CLockLocation& locklocation, bool fTry)
 {
+    if (!lockstack)
+        lockstack.reset(new LockStack);
+
     std::lock_guard<std::mutex> lock(lockdata.dd_mutex);
 
-    g_lockstack.push_back(std::make_pair(c, locklocation));
+    lockstack->push_back(std::make_pair(c, locklocation));
 
-    for (const std::pair<void*, CLockLocation>& i : g_lockstack) {
+    BOOST_FOREACH (const PAIRTYPE(void*, CLockLocation) & i, (*lockstack)) {
         if (i.first == c)
             break;
 
         std::pair<void*, void*> p1 = std::make_pair(i.first, c);
         if (lockdata.lockorders.count(p1))
             continue;
-        lockdata.lockorders[p1] = g_lockstack;
+        lockdata.lockorders[p1] = (*lockstack);
 
         std::pair<void*, void*> p2 = std::make_pair(c, i.first);
         lockdata.invlockorders.insert(p2);
@@ -126,12 +133,12 @@ static void push_lock(void* c, const CLockLocation& locklocation)
 
 static void pop_lock()
 {
-    g_lockstack.pop_back();
+    (*lockstack).pop_back();
 }
 
 void EnterCritical(const char* pszName, const char* pszFile, int nLine, void* cs, bool fTry)
 {
-    push_lock(cs, CLockLocation(pszName, pszFile, nLine, fTry));
+    push_lock(cs, CLockLocation(pszName, pszFile, nLine, fTry), fTry);
 }
 
 void LeaveCritical()
@@ -142,14 +149,14 @@ void LeaveCritical()
 std::string LocksHeld()
 {
     std::string result;
-    for (const std::pair<void*, CLockLocation>& i : g_lockstack)
+    BOOST_FOREACH (const PAIRTYPE(void*, CLockLocation) & i, *lockstack)
         result += i.second.ToString() + std::string("\n");
     return result;
 }
 
 void AssertLockHeldInternal(const char* pszName, const char* pszFile, int nLine, void* cs)
 {
-    for (const std::pair<void*, CLockLocation>& i : g_lockstack)
+    BOOST_FOREACH (const PAIRTYPE(void*, CLockLocation) & i, *lockstack)
         if (i.first == cs)
             return;
     fprintf(stderr, "Assertion failed: lock %s not held in %s:%i; locks held:\n%s", pszName, pszFile, nLine, LocksHeld().c_str());
@@ -163,7 +170,7 @@ void DeleteLock(void* cs)
         return;
     }
     std::lock_guard<std::mutex> lock(lockdata.dd_mutex);
-    std::pair<void*, void*> item = std::make_pair(cs, nullptr);
+    std::pair<void*, void*> item = std::make_pair(cs, (void*)0);
     LockOrders::iterator it = lockdata.lockorders.lower_bound(item);
     while (it != lockdata.lockorders.end() && it->first.first == cs) {
         std::pair<void*, void*> invitem = std::make_pair(it->first.second, it->first.first);

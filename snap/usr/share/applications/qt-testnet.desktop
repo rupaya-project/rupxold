@@ -1,0 +1,14 @@
+# http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
+
+[Desktop Entry]
+Type=Application
+Version=5.2.00
+Encoding=UTF-8
+Name=Rupaya-Qt Testnet
+Icon=${SNAP}/qt-testnet.ico
+MimeType=x-scheme-handler/rupaya;
+Exec=rupaya.qt-testnet --testnet %u
+Terminal=false
+Categories=Office;Finance;
+Comment=Rupaya Core Regression Test (by Rupaya-Project)
+Keywords=internet;rupaya;testnet;qt;crypto;currency;snap;snapcraft;RUPAYA-Project;daemon;cli;qt;zerocoin;zrupx

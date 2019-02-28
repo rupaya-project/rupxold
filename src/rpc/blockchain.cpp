@@ -1,7 +1,7 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2014 The Bitcoin developers
 // Copyright (c) 2014-2015 The Dash developers
-// Copyright (c) 2015-2018 The PIVX developers
+// Copyright (c) 2015-2018 The PIVX Developers 
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,26 +17,14 @@
 #include "accumulatormap.h"
 #include "accumulators.h"
 #include "wallet.h"
-#include "libzerocoin/bignum.h"
 #include "libzerocoin/Coin.h"
-
 #include <stdint.h>
 #include <fstream>
 #include <iostream>
 #include <univalue.h>
-#include <mutex>
-#include <condition_variable>
+#include "libzerocoin/bignum.h"
 
 using namespace std;
-
-struct CUpdatedBlock
-{
-    uint256 hash;
-    int height;
-};
-static std::mutex cs_blockchange;
-static std::condition_variable cond_blockchange;
-static CUpdatedBlock latestblock;
 
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, UniValue& out, bool fIncludeHex);
@@ -134,105 +122,17 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     if (pnext)
         result.push_back(Pair("nextblockhash", pnext->GetBlockHash().GetHex()));
 
-    result.push_back(Pair("modifier", strprintf("%016x", blockindex->nStakeModifier)));
-
     result.push_back(Pair("moneysupply",ValueFromAmount(blockindex->nMoneySupply)));
 
-    UniValue zpivObj(UniValue::VOBJ);
+    UniValue zrupxObj(UniValue::VOBJ);
     for (auto denom : libzerocoin::zerocoinDenomList) {
-        zpivObj.push_back(Pair(to_string(denom), ValueFromAmount(blockindex->mapZerocoinSupply.at(denom) * (denom*COIN))));
+        zrupxObj.push_back(Pair(to_string(denom), ValueFromAmount(blockindex->mapZerocoinSupply.at(denom) * (denom*COIN))));
     }
-    zpivObj.push_back(Pair("total", ValueFromAmount(blockindex->GetZerocoinSupply())));
-    result.push_back(Pair("zPIVsupply", zpivObj));
+    zrupxObj.push_back(Pair("total", ValueFromAmount(blockindex->GetZerocoinSupply())));
+    result.push_back(Pair("zRUPXsupply", zrupxObj));
 
     return result;
 }
-
-UniValue getchecksumblock(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() < 2 || params.size() > 3)
-        throw runtime_error(
-            "getchecksumblock\n"
-            "\nFinds the first occurrence of a certain accumulator checksum."
-            "\nReturns the block hash or, if fVerbose=true, the JSON block object\n"
-
-            "\nArguments:\n"
-            "1. \"checksum\"      (string, required) The hex encoded accumulator checksum\n"
-            "2. \"denom\"         (integer, required) The denomination of the accumulator\n"
-            "3. fVerbose          (boolean, optional, default=false) true for a json object, false for the hex encoded hash\n"
-
-            "\nResult (for fVerbose = true):\n"
-            "{\n"
-            "  \"hash\" : \"hash\",     (string) the block hash (same as provided)\n"
-            "  \"confirmations\" : n,   (numeric) The number of confirmations, or -1 if the block is not on the main chain\n"
-            "  \"size\" : n,            (numeric) The block size\n"
-            "  \"height\" : n,          (numeric) The block height or index\n"
-            "  \"version\" : n,         (numeric) The block version\n"
-            "  \"merkleroot\" : \"xxxx\", (string) The merkle root\n"
-            "  \"tx\" : [               (array of string) The transaction ids\n"
-            "     \"transactionid\"     (string) The transaction id\n"
-            "     ,...\n"
-            "  ],\n"
-            "  \"time\" : ttt,          (numeric) The block time in seconds since epoch (Jan 1 1970 GMT)\n"
-            "  \"mediantime\" : ttt,    (numeric) The median block time in seconds since epoch (Jan 1 1970 GMT)\n"
-            "  \"nonce\" : n,           (numeric) The nonce\n"
-            "  \"bits\" : \"1d00ffff\", (string) The bits\n"
-            "  \"difficulty\" : x.xxx,  (numeric) The difficulty\n"
-            "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
-            "  \"nextblockhash\" : \"hash\"       (string) The hash of the next block\n"
-            "  \"moneysupply\" : \"supply\"       (numeric) The money supply when this block was added to the blockchain\n"
-            "  \"zPIVsupply\" :\n"
-            "  {\n"
-            "     \"1\" : n,            (numeric) supply of 1 zPIV denomination\n"
-            "     \"5\" : n,            (numeric) supply of 5 zPIV denomination\n"
-            "     \"10\" : n,           (numeric) supply of 10 zPIV denomination\n"
-            "     \"50\" : n,           (numeric) supply of 50 zPIV denomination\n"
-            "     \"100\" : n,          (numeric) supply of 100 zPIV denomination\n"
-            "     \"500\" : n,          (numeric) supply of 500 zPIV denomination\n"
-            "     \"1000\" : n,         (numeric) supply of 1000 zPIV denomination\n"
-            "     \"5000\" : n,         (numeric) supply of 5000 zPIV denomination\n"
-            "     \"total\" : n,        (numeric) The total supply of all zPIV denominations\n"
-            "  }\n"
-            "}\n"
-
-            "\nResult (for verbose=false):\n"
-            "\"data\"             (string) A string that is serialized, hex-encoded data for block 'hash'.\n"
-
-            "\nExamples:\n" +
-            HelpExampleCli("getchecksumblock", "\"00000000000fd08c2fb661d2fcb0d49abb3a91e5f27082ce64feed3b4dede2e2\", 5") +
-            HelpExampleRpc("getchecksumblock", "\"00000000000fd08c2fb661d2fcb0d49abb3a91e5f27082ce64feed3b4dede2e2\", 5"));
-
-
-    LOCK(cs_main);
-
-    // param 0
-    std::string acc_checksum_str = params[0].get_str();
-    uint256 checksum_256(acc_checksum_str);
-    uint32_t acc_checksum = checksum_256.Get32();
-    // param 1
-    libzerocoin::CoinDenomination denomination = libzerocoin::IntToZerocoinDenomination(params[1].get_int());
-    // param 2
-    bool fVerbose = false;
-    if (params.size() > 2)
-        fVerbose = params[2].get_bool();
-
-    int checksumHeight = GetChecksumHeight(acc_checksum, denomination);
-
-    if (checksumHeight == 0)
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
-
-    CBlockIndex* pblockindex = chainActive[checksumHeight];
-
-    if (!fVerbose)
-        return pblockindex->GetBlockHash().GetHex();
-
-    CBlock block;
-    if (!ReadBlockFromDisk(block, pblockindex))
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
-
-    return blockToJSON(block, pblockindex);
-}
-
 
 UniValue getblockcount(const UniValue& params, bool fHelp)
 {
@@ -266,148 +166,6 @@ UniValue getbestblockhash(const UniValue& params, bool fHelp)
 
     LOCK(cs_main);
     return chainActive.Tip()->GetBlockHash().GetHex();
-}
-
-void RPCNotifyBlockChange(const uint256 hashBlock)
-{
-    CBlockIndex* pindex = nullptr;
-    pindex = mapBlockIndex.at(hashBlock);
-    if(pindex) {
-        std::lock_guard<std::mutex> lock(cs_blockchange);
-        latestblock.hash = pindex->GetBlockHash();
-        latestblock.height = pindex->nHeight;
-    }
-    cond_blockchange.notify_all();
-}
-
-UniValue waitfornewblock(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() > 1)
-        throw std::runtime_error(
-            "waitfornewblock ( timeout )\n"
-            "\nWaits for a specific new block and returns useful info about it.\n"
-            "\nReturns the current block on timeout or exit.\n"
-
-            "\nArguments:\n"
-            "1. timeout (int, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n"
-
-            "\nResult:\n"
-            "{                           (json object)\n"
-            "  \"hash\" : {       (string) The blockhash\n"
-            "  \"height\" : {     (int) Block height\n"
-            "}\n"
-
-            "\nExamples:\n"
-            + HelpExampleCli("waitfornewblock", "1000")
-            + HelpExampleRpc("waitfornewblock", "1000")
-        );
-    int timeout = 0;
-    if (params.size() > 0)
-        timeout = params[0].get_int();
-    CUpdatedBlock block;
-    {
-        std::unique_lock<std::mutex> lock(cs_blockchange);
-        block = latestblock;
-        if(timeout)
-            cond_blockchange.wait_for(lock, std::chrono::milliseconds(timeout), [&block]{return latestblock.height != block.height || latestblock.hash != block.hash || !IsRPCRunning(); });
-        else
-            cond_blockchange.wait(lock, [&block]{return latestblock.height != block.height || latestblock.hash != block.hash || !IsRPCRunning(); });
-        block = latestblock;
-    }
-    UniValue ret(UniValue::VOBJ);
-    ret.push_back(Pair("hash", block.hash.GetHex()));
-    ret.push_back(Pair("height", block.height));
-    return ret;
-}
-
-UniValue waitforblock(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() < 1 || params.size() > 2)
-        throw std::runtime_error(
-            "waitforblock blockhash ( timeout )\n"
-            "\nWaits for a specific new block and returns useful info about it.\n"
-            "\nReturns the current block on timeout or exit.\n"
-
-            "\nArguments:\n"
-            "1. \"blockhash\" (required, string) Block hash to wait for.\n"
-            "2. timeout       (int, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n"
-
-            "\nResult:\n"
-            "{                           (json object)\n"
-            "  \"hash\" : {       (string) The blockhash\n"
-            "  \"height\" : {     (int) Block height\n"
-            "}\n"
-
-            "\nExamples:\n"
-            + HelpExampleCli("waitforblock", "\"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\", 1000")
-            + HelpExampleRpc("waitforblock", "\"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\", 1000")
-        );
-    int timeout = 0;
-
-    uint256 hash = uint256S(params[0].get_str());
-
-    if (params.size() > 1)
-        timeout = params[1].get_int();
-
-    CUpdatedBlock block;
-    {
-        std::unique_lock<std::mutex> lock(cs_blockchange);
-        if(timeout)
-            cond_blockchange.wait_for(lock, std::chrono::milliseconds(timeout), [&hash]{return latestblock.hash == hash || !IsRPCRunning();});
-        else
-            cond_blockchange.wait(lock, [&hash]{return latestblock.hash == hash || !IsRPCRunning(); });
-        block = latestblock;
-    }
-
-    UniValue ret(UniValue::VOBJ);
-    ret.push_back(Pair("hash", block.hash.GetHex()));
-    ret.push_back(Pair("height", block.height));
-    return ret;
-}
-
-UniValue waitforblockheight(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() < 1 || params.size() > 2)
-        throw std::runtime_error(
-            "waitforblockheight height ( timeout )\n"
-            "\nWaits for (at least) block height and returns the height and hash\n"
-            "of the current tip.\n"
-            "\nReturns the current block on timeout or exit.\n"
-
-            "\nArguments:\n"
-            "1. height  (required, int) Block height to wait for (int)\n"
-            "2. timeout (int, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n"
-
-            "\nResult:\n"
-            "{                           (json object)\n"
-            "  \"hash\" : {       (string) The blockhash\n"
-            "  \"height\" : {     (int) Block height\n"
-            "}\n"
-
-            "\nExamples:\n"
-            + HelpExampleCli("waitforblockheight", "\"100\", 1000")
-            + HelpExampleRpc("waitforblockheight", "\"100\", 1000")
-        );
-    int timeout = 0;
-
-    int height = params[0].get_int();
-
-    if (params.size() > 1)
-        timeout = params[1].get_int();
-
-    CUpdatedBlock block;
-    {
-        std::unique_lock<std::mutex> lock(cs_blockchange);
-        if(timeout)
-            cond_blockchange.wait_for(lock, std::chrono::milliseconds(timeout), [&height]{return latestblock.height >= height || !IsRPCRunning();});
-        else
-            cond_blockchange.wait(lock, [&height]{return latestblock.height >= height || !IsRPCRunning(); });
-        block = latestblock;
-    }
-    UniValue ret(UniValue::VOBJ);
-    ret.push_back(Pair("hash", block.hash.GetHex()));
-    ret.push_back(Pair("height", block.height));
-    return ret;
 }
 
 UniValue getdifficulty(const UniValue& params, bool fHelp)
@@ -491,7 +249,7 @@ UniValue getrawmempool(const UniValue& params, bool fHelp)
             "{                           (json object)\n"
             "  \"transactionid\" : {       (json object)\n"
             "    \"size\" : n,             (numeric) transaction size in bytes\n"
-            "    \"fee\" : n,              (numeric) transaction fee in pivx\n"
+            "    \"fee\" : n,              (numeric) transaction fee in rupaya\n"
             "    \"time\" : n,             (numeric) local time transaction entered pool in seconds since 1 Jan 1970 GMT\n"
             "    \"height\" : n,           (numeric) block height when transaction entered pool\n"
             "    \"startingpriority\" : n, (numeric) priority when transaction entered pool\n"
@@ -572,17 +330,17 @@ UniValue getblock(const UniValue& params, bool fHelp)
             "  \"previousblockhash\" : \"hash\",  (string) The hash of the previous block\n"
             "  \"nextblockhash\" : \"hash\"       (string) The hash of the next block\n"
             "  \"moneysupply\" : \"supply\"       (numeric) The money supply when this block was added to the blockchain\n"
-            "  \"zPIVsupply\" :\n"
+            "  \"zRUPXsupply\" :\n"
             "  {\n"
-            "     \"1\" : n,            (numeric) supply of 1 zPIV denomination\n"
-            "     \"5\" : n,            (numeric) supply of 5 zPIV denomination\n"
-            "     \"10\" : n,           (numeric) supply of 10 zPIV denomination\n"
-            "     \"50\" : n,           (numeric) supply of 50 zPIV denomination\n"
-            "     \"100\" : n,          (numeric) supply of 100 zPIV denomination\n"
-            "     \"500\" : n,          (numeric) supply of 500 zPIV denomination\n"
-            "     \"1000\" : n,         (numeric) supply of 1000 zPIV denomination\n"
-            "     \"5000\" : n,         (numeric) supply of 5000 zPIV denomination\n"
-            "     \"total\" : n,        (numeric) The total supply of all zPIV denominations\n"
+            "     \"1\" : n,            (numeric) supply of 1 zRUPX denomination\n"
+            "     \"5\" : n,            (numeric) supply of 5 zRUPX denomination\n"
+            "     \"10\" : n,           (numeric) supply of 10 zRUPX denomination\n"
+            "     \"50\" : n,           (numeric) supply of 50 zRUPX denomination\n"
+            "     \"100\" : n,          (numeric) supply of 100 zRUPX denomination\n"
+            "     \"500\" : n,          (numeric) supply of 500 zRUPX denomination\n"
+            "     \"1000\" : n,         (numeric) supply of 1000 zRUPX denomination\n"
+            "     \"5000\" : n,         (numeric) supply of 5000 zRUPX denomination\n"
+            "     \"total\" : n,        (numeric) The total supply of all zRUPX denominations\n"
             "  }\n"
             "}\n"
 
@@ -735,8 +493,8 @@ UniValue gettxout(const UniValue& params, bool fHelp)
             "     \"hex\" : \"hex\",        (string) \n"
             "     \"reqSigs\" : n,          (numeric) Number of required signatures\n"
             "     \"type\" : \"pubkeyhash\", (string) The type, eg pubkeyhash\n"
-            "     \"addresses\" : [          (array of string) array of pivx addresses\n"
-            "     \"pivxaddress\"   	 	(string) pivx address\n"
+            "     \"addresses\" : [          (array of string) array of rupaya addresses\n"
+            "     \"rupayaaddress\"   	 	(string) rupaya address\n"
             "        ,...\n"
             "     ]\n"
             "  },\n"
@@ -1290,7 +1048,7 @@ UniValue getaccumulatorwitness(const UniValue& params, bool fHelp)
 
     int d = params[1].get_int();
     libzerocoin::CoinDenomination denomination = libzerocoin::IntToZerocoinDenomination(d);
-    libzerocoin::ZerocoinParams* zcparams = Params().Zerocoin_Params(false);
+    libzerocoin::ZerocoinParams* zcparams = Params().Zerocoin_Params();
 
     // Public coin
     libzerocoin::PublicCoin pubCoin(zcparams, coinValue, denomination);
@@ -1302,7 +1060,7 @@ UniValue getaccumulatorwitness(const UniValue& params, bool fHelp)
     int nMintsAdded = 0;
     CZerocoinSpendReceipt receipt;
     if (!GenerateAccumulatorWitness(pubCoin, accumulator, witness, 100, nMintsAdded, strFailReason)) {
-        receipt.SetStatus(_(strFailReason.c_str()), ZPIV_FAILED_ACCUMULATOR_INITIALIZATION);
+        receipt.SetStatus(_(strFailReason.c_str()), ZRUPX_FAILED_ACCUMULATOR_INITIALIZATION);
         throw JSONRPCError(RPC_DATABASE_ERROR, receipt.GetStatusMessage());
     }
 
