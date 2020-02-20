@@ -8,8 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Cache
-      uses: actions/cache@v1.1.2 
     - uses: actions/checkout@v2
     - name : deps
       run: ./depends.sh
