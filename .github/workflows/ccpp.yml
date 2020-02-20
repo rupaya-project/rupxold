@@ -13,8 +13,8 @@ jobs:
       run: ./depends.sh
     - name : autogen
       run: ./autogen.sh  
-    - name: configure --with-unsupported-ssl
-      run: ./configure
+    - name: configure 
+      run: ./configure --with-unsupported-ssl
     - name: make
       run: make
     - name: make check
