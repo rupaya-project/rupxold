@@ -64,7 +64,7 @@ deploy:
   provider: releases
   api_key:
     secure: W3j5nbWZSQO/ShoYUx4DylSH6Nv7s2REBU86YK7RdmxtvBH5b+FO8ZfnIeqE0ZsGNWaeOurdfZX8rVyiMiXtVok7WGL4k96bm1MIOACzELNySiGsYaCteKX/LP3rtGqAT9jsU0sUEZarv5KLDH5syFeIf3Uq8fZh4c5flNCGzJOcgjsm0bWpnDXTwCnUgWuhZnKAYbSFPnFrC7JD/LWrJkWqxhPpkTRMjHh8XRr4fUnvp+ExiTfuiGHOQMSQzCItg9A1jD29L6LWSiBZ9fA30IIPQt9no7DI7dcCGaM9uj3loVUlgrO/9T6ynmrPPU5fEid/bhcrPb6nWydLvqojHIw6KkmnlXg3/DwPP7BnMIO+JnmfNy5RxfmRhA4oAA1gtwowKSvNhL+z2K6keXlswx6SCAxWtsN37LB+4MoHVITrLwmF3WZzc27uGf1Prw3QyKVTwXnBeC/O8zjBVE3fDI8Aa1+87Rp6P7aNCqcAY77RBNjCLyMZJXdXjJ5bIpyo1ob0xayrbxhNk+4qKCW7Db6JdwenQ2vHO8J3NU7DvBV8pQD+7zWeWeTn18sJvPVhts7dI0zI845hUfFyxebYoLBBXjouRiUHlezsOTU5lgcvJm/la6ObOgzX9ED1GHgtV1dRJEIEYQ+4Lhjjjbp+7euO6yrebcCqjBOP3kY/ols=
-  file: $OUTDIR/zip/*
+  file: src/rupayad
   on:
     repo: rupaya-project/rupx
   acl: public_read
