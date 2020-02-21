@@ -51,7 +51,8 @@ before_deploy:
    - "./pre-deploy.sh"
 deploy:
   provider: s3
-  endpoint : https://wallet.nyc3.digitaloceanspaces.com
+  endpoint : https://.nyc3.digitaloceanspaces.com
+  bucket : wallet
   skip_cleanup: true
   local_dir:  $OUTDIR/zip
   on:
