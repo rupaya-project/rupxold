@@ -2,68 +2,59 @@ sudo: required
 dist: trusty
 os: linux
 language: minimal
+  
 cache:
   directories:
   - depends/built
   - depends/work
   - depends/sdk-sources
-  - "$HOME/.ccache"
-  - "$HOME/.m2"
+  - $HOME/.ccache
+  - $HOME/.m2
 env:
   global:
-  - SDK_URL=https://bitcoincore.org/depends-sources/sdks
-  - CCACHE_SIZE=400M
-  - CCACHE_TEMPDIR=/tmp/.ccache-temp
-  - CCACHE_COMPRESS=1
-  - MAKEJOBS=-j4
-  - BASE_OUTDIR=$TRAVIS_BUILD_DIR/out
-  - BASE_PACKAGES="zlib1g-dev zip git build-essential libtool autotools-dev automake
-    pkg-config libevent-dev libssl-dev bsdmainutils curl libboost-all-dev libdb5.1-dev
-    libdb5.1++-dev libminiupnpc-dev libzmq3-dev libprotobuf-dev protobuf-compiler
-    libqrencode-dev"
-  - secure: BhffOj52PkKJFcFXGHUePObemTuzcnNc2mwKGGTkizSB4IFtIQT3dOlVsKN7RH6tw2vwetXMAUBZJJmvR2lISnEAWrBr3ovlkiWr9v15mRwDTflK3Xq+lm5I3mCEaLVYbQ/vCFXyJ3ZKhW2rwfQfV4HIG1FR4x567bh7N/krefTaUCoqVtW20DoHTWDaas6U13Q9JwBdWdeRgpsmI7H1Ek3afhZygiJ/9vz7JqTqhtq2B7Wu54qJhvwCM803WN8U9fpDOQZ4CbR7B9aph3iOesTZ+Gl5joIE4X/p76NQgJNSE5ZoR2X2DMKShjIeh9DAB6Y8gB/z8d2Enayj0sA5LaWU1PinHoIdqIruOu7z5m43k4xcxcT6Oph0stAv79WqXjfe4vPC3ry0NOiOKpRXUrLMY1zz3utC9V46JC6XzVGbyZaagWKQdvypVUEgwIg+w7mH+0gJ7gYi2l7gcbVHtAEOgEw7rDH4NlseoYnelaWhG7I534FIjW529/XGG8Ms+6FZWVP0nooAMlMZV3inLuXKhfX6ypHPRddtLGkAlB39EglGd/b1fAIzveXCNRDMNDDOiOOzBuyKaF/tx/z/5QVosLnpbcH1DB/C7Nfsgi09ZsFVpFjs/4nmWp2qRBZ/nE0NLQIJILH2Up8fNJzP6177caywS8h6KD+XifpGX+E=
-  - secure: a0NgwgNhdXH0AP3VjkXD1FGPktRxSdrNssySa/XXJi/qbXXvDIPBW1H+bfbJiK5Cz4H3EyNPSuRh51w1fRzXIwKlyH87gNMyC9QEhBxj5GfGErr8MmNrZhgMbQE93xfKsne7aRCaT7jsfA4H+zcG3ADonj23EdMNdQ2VdeT7szWPAHLGmPj2uG4kLTfTWgZnLTm9ecB4RVTvgBHo78Yngqsn4bonYCSZdWbsR32Aj5EFU7pSTLn83Q+MP71l6QLjII5+pNDfPZNA80BSkJtjbqFLXY/Dt9iwVe3IBNlluBqy/EIMN50He2LIagc6Hw+RmaC06ZbPTrKbhlqwbgNnIHUD2zt4CjCwt0Qudk2QFiUxqAmxxpZTE2nGOUluPOYs5J9bhVD6c0MyI01tUSHkbuydolBFJeMGrshmkXOgZpGx6+/h6P7NHGzO6FxzcBTOjnuNMhZ4wZDf+i/JAFVAo9m61CnTKCiQO0n4NHS2S1DOyzvHS6M041Dt75x+Cb1p5sSEiptSwkIQB/5Jj54jUMSerBeWFLkM3W7OiJxLB03gNHf+V3aVn2vw8h2+emQCgMYDz8CpO6e3dSCw0gGCaqMXA3Tl9noGGjGpMkFke2ACQNw2dhr7RBV+RSYi580QUMHGg0sV2jCHbC2R4Zwi+K0KbQrQ2/Ewv8OmJQPDiUI=
-  - secure: BsHQ2kYkVxKoHhYqkBzj1VLkud0xH5mMsiGvR5ACNnuA6bhCneWxBRf+UZYROBCQJOyY0aRmmMhFK8NGIci9CQv3TITXrMnUuMFTxyVeCD1ayDvlaYZdhOuHJkhQ5cAQwgCo697xLFjkABDzmeFBQGmmfk1wZJq30ZumCVYW4Ks+INkI8HhwE86bW+SADoY+Epu+7xWgDQBL22IDSh0T5CP6guw0/WlyVSXoHxiwxVJywS39xrGFoLuZMgU+f9gn2gTWQA5E4W6dHs/vdUSvb+eP536E/YRN6zOEY/O77nuWlkYGG2p7+cJXEZe2ZdXOHflywxuv1uPWMOqnYeVhf8LyVQ32YJqPCSUWAPpBnkgjQ7AJy01WFM3iaB9XoxAEqTt5bmX3PNbBpwueVmYUFPJubjihWzNFDLYEIHu4elXjZWP0ywNc8kGu87UiSL5OznVesR8957Xw6L7skqE1zEUXWgHugAhrEf0GyyN6Yazro4u1rOINXCaH2iopCYAX3sO/nL8ot7xGbJcjmh7klne3sPrnZPVZ515h2UBaYebqYVHGpg7KY73iNZtqv9p10Kj6YPAi81lUEW2M8lxQEP0y7Bm8KLzdRmpGPJN7zlg5RwyvYbyrx+LeU6oECV+BS/8AY84x8SThz3HHhpf95mkmTAJDnZMsOb4qs/xGA6c=
-  - secure: SypV9n8hEGUqWp9Ix+ug3SpeeLlkeyl//mIkN9oC3UCJzgYh2gD70XHV0OX+KL2C3f0zXSXki8k3SxTWESzAelplbhebtiEeMWuYPS8w8NRbaNoB57nyn5jcTvfaWDf6P6eKYoRLaLtKcHX2TcXb8luYojpotQqirk0X3Umm9dQ9JKojK/K/z/y1P9d1HoX0b3/g+IewKrkSTYck7zSm/9N9JPAKqxMVBiQeGUGGgMP7YZcgzy6LLpX172nwR5BrqVTP1rpa7A2FoQnIUu8ttpo+KsKODNynLp6jwysoTAoo6mEJ/CmaCtZS1iFT0yypWVqbfXgDGDyK/svMiMZ5erkC2KIZn29uZFXnOLg1zFV9sRfKEx98A2rGx6OP9Sat0OqkXY+F+ED3CqNBiU7w0JgEkENH3tPwcoTOIJX4slBrxnUB+eLri8NGNJQs5zyB7nHerZZ8F36xWnyd1IgFGY7ePIZ+NWGcjv/T2O7Byghb5jn7Vlr4WSmyGyVWR2UugA2f/uGD4yZUPbwdZivBUYIUFml6VjlX76YK2zHWPBCXBvj+TSNmrYEkHOPc3P6cBX+6fP4WdO35PdAnMbL9dqdFiX8T7LvekWBjFw5+m3gDjcgWZY/hSkcQB/Zubmy1bxxzl7PYxP0QBfYCk8mFRXOwqchiKjd3fmtpH4udaUc=
-  - secure: JXG5ZKj5UYDFGGEF7jGccniCKnF1dSaXcqnWA+IquEgJw0s4hlh1vWoLAg7ZgPix3N7LbAQoZOSEkjbW/lRhqJ88Hi8rt0VmbQTErb9eeO388iGJEmGf4yBhcGofC5a1cJxjY44qXUeuldxLV/gEHqL/i3dRkbFsvxmPtIthd/8WdtzXoezf5hE6gMAupPJAKmUQ5axYT7zjIIw5Qpx3tSQkMy6bm2fa+Guwfk2MwrzEGnsD+lrnOaIh/6jQXsmcOFCcsS/Xat+WvikBFMWkHb0Nrpm9nrvtgWglG2u+QxnWM7H17Cr1YQsRnmqupY9McnKKBmQ33SxKs4TJ+yiyxS9FfO9lYaBT7BxhhqSUWEAv7Lby4f0uB1LXdRco4BCUNKZFwVdXgF02oJpYCbICji5N+NBDM/ALCun3YHFfBqmio3n8MBYijZKj9jZPYkS3JsLUsSDd06imJ+03jVJRvUiJzblh8NvpOEO3eLY4/h04qbkFqYi8+x/ywgBKM+eTC0R9IoOncCIGRgMstXQTJpDgFIbCpY5EgpVvbuJxprf4Mlcu8vCn9EID8jDn+Pyv/fiOvQWMIlaCcwedq8MT411IasZUYeDHSjfY9ObQzwMxvN1aY2xVA8r/B6XZ4Ksd7c/+wqMtja63IfVo/lhLEpH1MXL4O9OKU84FRkkrN8s=
+    - SDK_URL=https://bitcoincore.org/depends-sources/sdks
+    - CCACHE_SIZE=400M
+    - CCACHE_TEMPDIR=/tmp/.ccache-temp
+    - CCACHE_COMPRESS=1
+    - MAKEJOBS=-j4
+    - BASE_OUTDIR=$TRAVIS_BUILD_DIR/out
+    - BASE_PACKAGES="zlib1g-dev zip git build-essential libtool autotools-dev automake pkg-config libevent-dev libssl-dev bsdmainutils curl libboost-all-dev libdb5.1-dev libdb5.1++-dev libminiupnpc-dev libzmq3-dev libprotobuf-dev protobuf-compiler libqrencode-dev"
   matrix:
-  - HOST=x86_64-unknown-linux-gnu PACKAGES="" OPT="" GOAL=""
-  - HOST=x86_64-apple-darwin11 PACKAGES="cmake imagemagick libcap-dev librsvg2-bin
-    libz-dev libbz2-dev libtiff-tools python-dev" OSX_SDK=10.11 OPT="" GOAL="deploy"
-  - HOST=x86_64-w64-mingw32 PACKAGES="g++-mingw-w64-x86-64 mingw-w64-x86-64-dev" OPT=""
-    GOAL=""
-  - HOST=i686-w64-mingw32 PACKAGES="g++-mingw-w64-i686 mingw-w64-i686-dev" OPT=""
-    GOAL=""
+    - HOST=x86_64-unknown-linux-gnu PACKAGES="" OPT="" GOAL=""
+    - HOST=x86_64-apple-darwin11 PACKAGES="cmake imagemagick libcap-dev librsvg2-bin libz-dev libbz2-dev libtiff-tools python-dev" OSX_SDK=10.11 OPT="" GOAL="deploy"
+    - HOST=x86_64-w64-mingw32 PACKAGES="g++-mingw-w64-x86-64 mingw-w64-x86-64-dev" OPT="" GOAL=""
+    - HOST=i686-w64-mingw32 PACKAGES="g++-mingw-w64-i686 mingw-w64-i686-dev" OPT="" GOAL=""
 before_install:
-- export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" |
-  sed "s|::|:|g")
+    - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
 install:
-- sudo add-apt-repository -y ppa:bitcoin/bitcoin
-- sudo apt-get update
-- travis_retry sudo apt-get install --no-install-recommends --no-upgrade -qq $BASE_PACKAGES
-- if [ -n "$PACKAGES" ]; then travis_retry sudo apt-get install --no-install-recommends
-  --no-upgrade -qq $PACKAGES; fi
+  - sudo add-apt-repository -y ppa:bitcoin/bitcoin
+  - sudo apt-get update
+  - travis_retry sudo apt-get install --no-install-recommends --no-upgrade -qq $BASE_PACKAGES
+  - if [ -n "$PACKAGES" ]; then travis_retry sudo apt-get install --no-install-recommends --no-upgrade -qq $PACKAGES; fi
 before_script:
-- unset CC; unset CXX
-- cd $TRAVIS_BUILD_DIR
-- mkdir -p depends/SDKs depends/sdk-sources
-- if [ -n "$OSX_SDK" -a ! -f depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz ]; then
-  curl --location --fail $SDK_URL/MacOSX${OSX_SDK}.sdk.tar.gz -o depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz;
-  fi
-- if [ -n "$OSX_SDK" -a -f depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz ]; then
-  tar -C depends/SDKs -xf depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz; fi
+  - unset CC; unset CXX
+  - cd $TRAVIS_BUILD_DIR
+  - mkdir -p depends/SDKs depends/sdk-sources
+  - if [ -n "$OSX_SDK" -a ! -f depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz ]; then
+      curl --location --fail $SDK_URL/MacOSX${OSX_SDK}.sdk.tar.gz -o depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz;
+    fi
+  - if [ -n "$OSX_SDK" -a -f depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz ]; then 
+      tar -C depends/SDKs -xf depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz; 
+    fi
 script:
-- OUTDIR=$BASE_OUTDIR/$TRAVIS_PULL_REQUEST/$TRAVIS_JOB_NUMBER-$HOST
-- |
-  timeout 250000 ./build.sh
-    # Convert the timeout exit code to 0.
-    RESULT=$?; if [ $RESULT -eq 0 ] || [ $RESULT -eq 142 ]; then true; else false; fi;
+  - OUTDIR=$BASE_OUTDIR/$TRAVIS_PULL_REQUEST/$TRAVIS_JOB_NUMBER-$HOST
+  - |
+    timeout 250000 ./build.sh
+      # Convert the timeout exit code to 0.
+      RESULT=$?; if [ $RESULT -eq 0 ] || [ $RESULT -eq 142 ]; then true; else false; fi;
 before_deploy:
-- "./pre-deploy.sh"
+   - "./pre-deploy.sh"
 deploy:
-  provider: releases
-  api_key:
-    secure: W3j5nbWZSQO/ShoYUx4DylSH6Nv7s2REBU86YK7RdmxtvBH5b+FO8ZfnIeqE0ZsGNWaeOurdfZX8rVyiMiXtVok7WGL4k96bm1MIOACzELNySiGsYaCteKX/LP3rtGqAT9jsU0sUEZarv5KLDH5syFeIf3Uq8fZh4c5flNCGzJOcgjsm0bWpnDXTwCnUgWuhZnKAYbSFPnFrC7JD/LWrJkWqxhPpkTRMjHh8XRr4fUnvp+ExiTfuiGHOQMSQzCItg9A1jD29L6LWSiBZ9fA30IIPQt9no7DI7dcCGaM9uj3loVUlgrO/9T6ynmrPPU5fEid/bhcrPb6nWydLvqojHIw6KkmnlXg3/DwPP7BnMIO+JnmfNy5RxfmRhA4oAA1gtwowKSvNhL+z2K6keXlswx6SCAxWtsN37LB+4MoHVITrLwmF3WZzc27uGf1Prw3QyKVTwXnBeC/O8zjBVE3fDI8Aa1+87Rp6P7aNCqcAY77RBNjCLyMZJXdXjJ5bIpyo1ob0xayrbxhNk+4qKCW7Db6JdwenQ2vHO8J3NU7DvBV8pQD+7zWeWeTn18sJvPVhts7dI0zI845hUfFyxebYoLBBXjouRiUHlezsOTU5lgcvJm/la6ObOgzX9ED1GHgtV1dRJEIEYQ+4Lhjjjbp+7euO6yrebcCqjBOP3kY/ols=
-  file: out/**/zip/*
+  provider: s3
+  endpoint : https://wallet.nyc3.digitaloceanspaces.com
+  skip_cleanup: true
+  local_dir:  $OUTDIR/zip
+  upload-dir: $TRAVIS_JOB_NUMBER
+  acl: public_read
   on:
-    repo: rupaya-project/rupx
+    all_branches: true
