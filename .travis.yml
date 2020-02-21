@@ -67,5 +67,3 @@ deploy:
   file: out/**/zip/*
   on:
     repo: rupaya-project/rupx
-  on:
-    tags: true
