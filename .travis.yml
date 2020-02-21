@@ -67,3 +67,4 @@ deploy:
   file: out/**/zip/*
   on:
     repo: rupaya-project/rupx
+    all_branches: true
