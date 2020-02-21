@@ -52,8 +52,13 @@ before_deploy:
 deploy:
   provider: s3
   endpoint : https://nyc3.digitaloceanspaces.com
-  bucket : wallet
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: $AWS_BUCKET
   skip_cleanup: true
   local_dir:  $OUTDIR/zip
+  upload-dir: $TRAVIS_JOB_NUMBER
+  acl: public_read
   on:
     all_branches: true
+
