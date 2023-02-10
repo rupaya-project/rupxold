@@ -44,7 +44,7 @@ static void convertSeed6(std::vector<CAddress>& vSeedsOut, const SeedSpec6* data
         vSeedsOut.push_back(addr);
     }
 }
- static bool regenerate = false;
+ static bool regenerate = true;
 
 //   What makes a good checkpoint block?
 // + Is surrounded by blocks with reasonable timestamps
@@ -151,19 +151,19 @@ public:
          * Build the genesis block. Note that the output of the genesis coinbase cannot
          * be spent as it did not originally exist in the database.
          */
-        const char* pszTimestamp = "Bitcoin Breaks 7500 USD Point After a Week of Solid Growth";
+        const char* pszTimestamp = "Rupaya - Empowering individuals with financial freedom and privacy";
         CMutableTransaction txNew;
         txNew.vin.resize(1);
         txNew.vout.resize(1);
         txNew.vin[0].scriptSig = CScript() << 486604799 << CScriptNum(4) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
         txNew.vout[0].nValue = 50 * COIN;
-        txNew.vout[0].scriptPubKey = CScript() << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f") << OP_CHECKSIG;
+        txNew.vout[0].scriptPubKey = CScript() << ParseHex("0498df5a68624f744686dfe66e3cbc053307c43c8970621a1371dcd772bd748058b29424c9edb86711913525693b1f160efa3d89b802db053982324e7a4b63c4ef") << OP_CHECKSIG;
         genesis.vtx.push_back(txNew);
         genesis.hashPrevBlock = 0;
         genesis.hashMerkleRoot = genesis.BuildMerkleTree();
-        genesis.nVersion = 4;
+        genesis.nVersion = 5;
         genesis.nAccumulatorCheckpoint = 0;
-        genesis.nTime = 1533927507;
+        genesis.nTime = 1676040784;
         genesis.nBits = 504365040;
         genesis.nNonce = 462387;
 
